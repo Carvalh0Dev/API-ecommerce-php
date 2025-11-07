@@ -1,30 +1,13 @@
 <?php
 
-    require_once 'vendor/autoload.php';
-
-    use Dotenv\Dotenv;
-    $dotenv = Dotenv::createImmutable(__DIR__ );
-    $dotenv->load();
-
-    use \Firebase\JWT\JWT;
-    use \Firebase\JWT\Key;
 
     require_once('../Database/connection.php');
     class UserController {
 
-        private $JWT_SECRET_KEY; 
-        private const JWT_ALGORITHM = 'HS256';
 
         private $db;
 
         public function __construct() {
-
-            $this->JWT_SECRET_KEY = $_ENV['JWT_SECRET_KEY'] ?? null;
-
-            if(is_null($this->JWT_SECRET_KEY)) {
-
-                die("JWT não carregada no ambiente");
-            }
 
             $this->db = connectionDbMysql::getInstance()->getConnection();
 
@@ -78,25 +61,9 @@
 
             if ($usuario && password_verify($senha_recebida, $usuario['senha'])) {
 
-                //geração do JWT
-                $id_usuario = $usuario['id'];
-                $login_usuario = $usuario['login'];
-
-                $payload = [
-                    'iss' => "SeuAppAPI",
-                    'exp' => time() + (3600), //expira em 1 hora
-                    'data' => [
-                        'user_id' => $id_usuario,
-                        'login' => $login_usuario
-                        ]
-                    ];
-
-                $jwt = JWT::encode($payload, $this -> JWT_SECRET_KEY, self :: JWT_ALGORITHM);
-
-                return [
-                    'jwt'=> $jwt,
-                    'user_id' => $id_usuario,
-                    'login' => $login_usuario
+                return [ 
+                    'id' => $usuario['id'],
+                    'login' => $usuario['login']
                 ];
 
             } else {
